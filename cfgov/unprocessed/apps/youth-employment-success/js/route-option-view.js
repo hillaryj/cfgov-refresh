@@ -26,7 +26,7 @@ const CLASSES = Object.freeze( {
 function RouteOptionFormView( element, {
   store,
   routeIndex,
-  detailsView,
+  routeDetailsView,
   averageCostView,
   daysPerWeekView,
   milesView,
@@ -65,6 +65,10 @@ function RouteOptionFormView( element, {
     init() {
       if ( setInitFlag( _dom ) ) {
         _initRouteOptions();
+
+        const detailsView = routeDetailsView(
+          _dom.querySelector( `.${ routeDetailsView.CLASSES.CONTAINER }` )
+        );
 
         transitTimeView(
           _dom.querySelector( `.${ transitTimeView.CLASSES.CONTAINER }` ),

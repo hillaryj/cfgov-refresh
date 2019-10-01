@@ -3,10 +3,12 @@ import routeOptionFormView from '../../../../../cfgov/unprocessed/apps/youth-emp
 import averageCostView from '../../../../../cfgov/unprocessed/apps/youth-employment-success/js/views/average-cost';
 import milesView from '../../../../../cfgov/unprocessed/apps/youth-employment-success/js/views/miles';
 import transitTimeView from '../../../../../cfgov/unprocessed/apps/youth-employment-success/js/views/transit-time';
+import routeDetailsView from '../../../../../cfgov/unprocessed/apps/youth-employment-success/js/views/route-details';
 import {
   updateTransportationAction
 } from '../../../../../cfgov/unprocessed/apps/youth-employment-success/js/reducers/route-option-reducer';
 import daysPerWeekView from '../../../../../cfgov/unprocessed/apps/youth-employment-success/js/views/days-per-week';
+import mockStore from '../../../mocks/store';
 
 jest.mock( '../../../../../cfgov/unprocessed/apps/youth-employment-success/js/todo-notification' );
 
@@ -34,10 +36,11 @@ describe( 'routeOptionFormView', () => {
   const daysViewInit = jest.fn();
   const milesViewInit = jest.fn();
   const transitViewInit = jest.fn();
-  const detailsView = {
+  const detailsViewMock = () => ( {
     init: detailsInit,
     render: detailsRender
-  };
+  } );
+  detailsViewMock.CLASSES = routeDetailsView.CLASSES;
   const viewMock = mock => () => ( {
     init: mock
   } );
@@ -53,24 +56,6 @@ describe( 'routeOptionFormView', () => {
   const transitViewMock = viewMock( transitViewInit );
   transitViewMock.CLASSES = transitTimeView.CLASSES;
 
-  const mockStore = () => ( {
-    dispatch,
-    subscribe( fn ) {
-      return fn( {
-        routes: { routes: []}
-      }, {
-        routes: { routes: []
-        }
-      } );
-    },
-    getState() {
-      return {
-        routes: {
-          routes: []
-        }
-      };
-    }
-  } );
   let view;
   let store;
 
@@ -80,7 +65,7 @@ describe( 'routeOptionFormView', () => {
     view = routeOptionFormView( document.querySelector( `.${ CLASSES.FORM }` ), {
       store,
       routeIndex: 0,
-      detailsView,
+      routeDetailsView: detailsViewMock,
       averageCostView: costViewMock,
       daysPerWeekView: daysPerWeekViewMock,
       milesView: milesViewMock,
@@ -90,6 +75,7 @@ describe( 'routeOptionFormView', () => {
   } );
 
   afterEach( () => {
+    store.mockReset();
     dispatch.mockReset();
     view = null;
   } );
@@ -99,6 +85,7 @@ describe( 'routeOptionFormView', () => {
     expect( detailsInit ).toHaveBeenCalled();
     expect( daysViewInit ).toHaveBeenCalled();
     expect( milesViewInit ).toHaveBeenCalled();
+    expect( transitViewInit ).toHaveBeenCalled();
   } );
 
 
@@ -111,5 +98,11 @@ describe( 'routeOptionFormView', () => {
 
     expect( mock.calls.length ).toBe( 1 );
     expect( mock.calls[0][0] ).toEqual( updateTransportationAction( { routeIndex: 0, value: radioEl.value } ) );
+  } );
+
+  it( 'calls render on its children when the store updates', () => {
+    store.subscriber()( {}, { budget: {}, routes: { routes: []}} );
+
+    expect( detailsRender ).toHaveBeenCalled();
   } );
 } );
